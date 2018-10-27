@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+import urllib.request
+import json
+import re
+
+def getfile():
+    wg21url = "https://wg21.link/index.json"
+    with urllib.request.urlopen(wg21url) as url:
+        data = json.loads(url.read().decode())
+        return data
+
+def generate_bibtex_entry(identity, info):
+    entry = {}
+    entry["type"] = "book"
+    entry["key"] = identity
+    entry["title"] = info["title"]
+    entry["file"] = info["link"]
+    if "author" in info:
+        entry["author"] = info["author"]
+    elif "submitter" in info:
+        entry["author"] = info["submitter"]
+    else:
+        entry["author"] = "unknown"
+    return entry
+
+def generate_bibtex_array(json):
+    array = []
+    for key, value in json.items():
+        entry = generate_bibtex_entry(key, value)
+        array.append(entry)
+    return array
+
+def generate_bibtex_string(bibtex):
+    bibtex_string = ""
+    for entry in bibtex:
+        bibtex_string = bibtex_string + "@Book{"
+        bibtex_string = bibtex_string + entry["key"]
+        bibtex_string = bibtex_string + ",\n"
+        bibtex_string = bibtex_string + "  author = {"
+        bibtex_string = bibtex_string + entry["author"] 
+        bibtex_string = bibtex_string + "},\n"
+        bibtex_string = bibtex_string + "  title = {"
+        bibtex_string = bibtex_string +  re.sub('[^0-9a-zA-Z\ -<>_+()?]+', '*', entry["title"] )
+        bibtex_string = bibtex_string + "},\n"
+        bibtex_string = bibtex_string + "  file = {"
+        bibtex_string = bibtex_string + entry["file"]
+        bibtex_string = bibtex_string + "}\n"
+        bibtex_string = bibtex_string + "}\n"
+        bibtex_string = bibtex_string + "\n"
+    return bibtex_string
+
+def write_bib_file(bibtex):
+    bibtex_string=generate_bibtex_string(bibtex)
+    with open("wg21.bib", 'w') as f:
+        f.write(bibtex_string)
+
+if __name__ == "__main__":
+    file = getfile()
+    bibtex = generate_bibtex_array(file)
+    write_bib_file(bibtex)
+
