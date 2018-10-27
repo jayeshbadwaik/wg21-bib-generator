@@ -38,10 +38,10 @@ def generate_bibtex_string(bibtex):
         bibtex_string = bibtex_string + entry["key"]
         bibtex_string = bibtex_string + ",\n"
         bibtex_string = bibtex_string + "  author = {"
-        bibtex_string = bibtex_string + entry["author"] 
+        bibtex_string = bibtex_string + re.sub('[\,]', " and", entry["author"] )
         bibtex_string = bibtex_string + "},\n"
         bibtex_string = bibtex_string + "  title = {"
-        bibtex_string = bibtex_string +  re.sub('[^0-9a-zA-Z\ -<>_+()?]+', '*', entry["title"] )
+        bibtex_string = bibtex_string +  re.sub('[&]', 'and', re.sub('[^0-9a-zA-Z\ -<>_+()?]+', '*', entry["title"] ))
         bibtex_string = bibtex_string + "},\n"
         bibtex_string = bibtex_string + "  file = {"
         bibtex_string = bibtex_string + entry["file"]
